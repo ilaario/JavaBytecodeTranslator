@@ -1,0 +1,4 @@
+assign 59 to a;
+while (a > 1){
+    ciao
+}

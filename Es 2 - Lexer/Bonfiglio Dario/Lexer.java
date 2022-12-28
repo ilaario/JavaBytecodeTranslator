@@ -1,5 +1,4 @@
 package Lexer;
-
 import java.io.*;
 
 public class Lexer {
@@ -281,14 +280,13 @@ public class Lexer {
                         System.err.println("Erroneous character: " 
                                 + peek );
                         return null;
-                        //dario gay capo degli ebrei
                 }
          }
     }
 		
     public static void main(String[] args) {
         Lexer lex = new Lexer();
-        String path = "/home/ilaario/Progetti/universityCodes/Linguaggi Formali e Traduttori/Laboratorio/LFT_Progetto/src/Lexer/textLexer.txt"; // il percorso del file da leggere
+        String path = "/Users/ilaario/Desktop/Progetti/ProgettoLFT/Es 2 - Lexer/Bonfiglio Dario/testLexer.txt"; // il percorso del file da leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
             Token tok;
@@ -298,9 +296,6 @@ public class Lexer {
             } while (tok.tag != Tag.EOF);
             br.close();
         } catch (IOException e) {e.printStackTrace();}
-
-
-        //scemo coglione sei stato hackerato
     }
 
 }
