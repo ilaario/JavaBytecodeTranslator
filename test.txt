@@ -1,0 +1,18 @@
+print[256];
+read[a];
+while(<=12 65)
+    print[256];
+assign +(-(33,43),34) to a;
+
+//ciao
+
+{print[244];};
+
+conditional[
+    option(<=22 33) do
+        print[2];
+    option(==a b) do
+        read[c]
+    ] else
+        print[1]
+    end;
