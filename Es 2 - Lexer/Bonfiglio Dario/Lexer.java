@@ -5,6 +5,7 @@ public class Lexer {
 
     public static int line = 1;
     private char peek = ' ';
+    public String num;
     
     private void readch(BufferedReader br) {
         try {
@@ -265,12 +266,11 @@ public class Lexer {
                         if(Character.isDigit(peek)){
                             wordBuild.append(peek);
                             readch(br);
-                            //piscio sburo sui preti pelati
                         } else {
                             continua = false;
                         }
                     }
-                    String num = wordBuild.toString();
+                    num = wordBuild.toString();
                     if(!isValid){
                         return new Word(Tag.ID, num);
                     } else {

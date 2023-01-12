@@ -21,7 +21,10 @@ public class Parser {
     }
     void match(int t) {
         if (look.tag == t) {
-            if (look.tag != Tag.EOF) move(); } else error("Errore sintattico durante il match("+ look.tag +"->"+ (char)t+")");
+            if (look.tag != Tag.EOF) move();
+        } else {
+            error("Errore sintattico durante il match("+ look.tag +"->"+ (char)t+")");
+        }
     }
 
     void prog() {
@@ -395,7 +398,7 @@ public class Parser {
 
     public static void main (String[]args){
             Lexer lex = new Lexer();
-            String path = "/Users/ilaario/Desktop/Progetti/ProgettoLFT/test.txt"; // il percorso del file da leggere
+            String path = "/Users/ilaario/Desktop/Progetti/ProgettoLFT/Es 3 - Parser/Es3.2/testParser.txt"; // il percorso del file da leggere
             try {
                 BufferedReader br = new BufferedReader(new FileReader(path));
                 Parser parser = new Parser(lex, br);

@@ -50,7 +50,7 @@ a3finali {
             }
         }
 
-        return state != 3 && state != -1;
+        return state == 0;
     }
 
     public static void main(String[] args){

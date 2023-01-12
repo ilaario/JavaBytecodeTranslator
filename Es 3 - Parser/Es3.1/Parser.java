@@ -17,103 +17,102 @@ public class Parser {
     }
     void match(int t) {
         if (look.tag == t) {
-            if (look.tag != Tag.EOF) move(); } else error("Errore sintattico durante il match()");
+            if (look.tag != Tag.EOF) move(); } else error("Errore sintattico durante il match(" + look.tag + " -> " + t +")");
     }
     public void start() {
-        if(look.tag == '(' || look.tag == Tag.NUM){
-            expr();
-            match(Tag.EOF);
-        } else {
-            error("Errore sintattico in <start>.");
+        switch (look.tag){
+            case '(', Tag.NUM:
+                expr();
+            case Tag.EOF:
+                break;
+            default:
+                error("Errore sintattico in <start>");
         }
     }
     private void expr() {
-        if(look.tag == '(' || look.tag == Tag.NUM){
-            term();
-            exprp();
-        } else {
-            error("Errore sintattico in <expr>.");
-        }
+        term();
+        exprp();
     }
+
+    private void term () {
+        fact();
+        termp();
+    }
+
     private void exprp() {
-        switch (look.tag) {
+        switch (look.tag){
             case '+':
                 match('+');
                 term();
                 exprp();
                 break;
+
             case '-':
                 match('-');
                 term();
                 exprp();
                 break;
-            case ')':
-            case Tag.EOF:
+
+            case ')', Tag.EOF:
                 break;
+
             default:
-                error("Errore sintattico in <exprp>.");
+                expr();
         }
     }
-        private void term () {
-            if(look.tag == '(' || look.tag == Tag.NUM){
+
+    private void termp () {
+        switch (look.tag){
+            case '*':
+                match('*');
                 fact();
                 termp();
-            } else {
-                error("Errore sintattico in <term>.");
-            }
-        }
-        private void termp () {
-            switch (look.tag){
-                case '*':
-                    match('*');
-                    fact();
-                    termp();
-                    break;
-                case '/':
-                    match('/');
-                    fact();
-                    termp();
-                    break;
-                case Tag.EOF:
-                case '+':
-                case '-':
-                case ')':
-                    break;
-                default:
-                    error("Errore sintattico in <termp>.");
-            }
-        }
-        private void fact () {
-            switch (look.tag){
-                case Tag.NUM:
-                    match(Tag.NUM);
-                    break;
-                case Tag.ID:
-                    match(Tag.ID);
-                    break;
-                default:
-                    match('(');
-                    expr();
-                    if(look.tag == ')'){
-                        match(')');
-                    } else {
-                        error("Errore sintattico in <fact>.");
-                    }
-                    break;
-            }
-        }
+                break;
 
-        public static void main (String[]args){
-            Lexer lex = new Lexer();
-            String path = "/Users/ilaario/Desktop/Progetti/ProgettoLFT/test.txt"; // il percorso del file da leggere
-            try {
-                BufferedReader br = new BufferedReader(new FileReader(path));
-                Parser parser = new Parser(lex, br);
-                parser.start();
-                System.out.println("Input OK");
+            case '/':
+                match('/');
+                fact();
+                termp();
+                break;
+
+            case '+', '-', ')', Tag.EOF:
+                break;
+
+            default:
+                expr();
+        }
+    }
+    private void fact () {
+        switch (look.tag){
+            case '(':
+                match('(');
+                expr();
+                match(')');
+                break;
+
+            case Tag.NUM:
+                match(Tag.NUM);
+                break;
+
+            case Tag.EOF:
+                break;
+
+            default:
+                error("Errore sintattico in <fact>: " + look.tag);
+        }
+    }
+
+    public static void main (String[]args){
+        Lexer lex = new Lexer();
+        String path = "/Users/ilaario/Desktop/Progetti/ProgettoLFT/Es 3 - Parser/Es3.1/testParser"; // il percorso del file da leggere
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(path));
+            Parser parser = new Parser(lex, br);
+            parser.start();
+            System.out.println("Input OK");
                 br.close();
-            } catch(IOException e){
-                e.printStackTrace();
+        } catch(IOException e){
+            e.printStackTrace();
         }
     }
 }
