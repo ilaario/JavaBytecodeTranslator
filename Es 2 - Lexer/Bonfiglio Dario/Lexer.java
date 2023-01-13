@@ -266,13 +266,19 @@ public class Lexer {
                         if(Character.isDigit(peek)){
                             wordBuild.append(peek);
                             readch(br);
+                        } else if ((Character.isLetter(peek) || peek == '_') && peek != ' ') {
+                            wordBuild.append(peek);
+                            readch(br);
+                            isValid = false;
                         } else {
                             continua = false;
                         }
                     }
                     num = wordBuild.toString();
                     if(!isValid){
-                        return new Word(Tag.ID, num);
+                        System.err.println("Erroneous character: "
+                                + num );
+                        return null;
                     } else {
                         return new NumberTok(Tag.NUM, num);
                     }

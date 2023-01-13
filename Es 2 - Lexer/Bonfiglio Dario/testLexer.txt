@@ -1,1 +1,9 @@
-+(56 43)
+assign 100 to a;
+
+conditional[
+    option (<= 0 2) do print[1];
+    option (>= 0 2) do print[-+(2,3)5]
+] else print[3] end;
+
+while(== 1 1)
+    print[1];

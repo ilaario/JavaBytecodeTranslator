@@ -136,13 +136,10 @@ public class Parser {
             case '{':
                 match('{');
                 statlist();
-                break;
-
-            case Tag.EOF:
-                break;
-
-            case '}': //non ha senso, funziona ma è da cambiare lol
                 match('}');
+                break;
+
+            case Tag.EOF, '}':
                 break;
 
             default:
@@ -157,7 +154,7 @@ public class Parser {
                 stat();
                 statlistp();
                 break;
-            case Tag.EOF:
+            case Tag.EOF, '}':
                 break;
             default:
                 error("Errore sintattico in <statlistp>");

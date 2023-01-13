@@ -1,1 +1,8 @@
 assign +(3, 4) to a;
+
+{print[2];};
+
+conditional[
+    option (<= 0 2) do print[1];
+    option (>= 0 2) do print[2];
+] else print[3];
