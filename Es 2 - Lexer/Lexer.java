@@ -1,4 +1,3 @@
-package Lexer;
 import java.io.*;
 
 public class Lexer {
@@ -292,7 +291,7 @@ public class Lexer {
 		
     public static void main(String[] args) {
         Lexer lex = new Lexer();
-        String path = "/Users/ilaario/Desktop/Progetti/ProgettoLFT/Es 2 - Lexer/Bonfiglio Dario/testLexer.txt"; // il percorso del file da leggere
+        String path = "/Users/ilaario/Desktop/Progetti/ProgettoLFT/Es 2 - Lexer/testLexer.txt"; // il percorso del file da leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
             Token tok;

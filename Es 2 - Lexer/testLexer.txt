@@ -1,9 +1,12 @@
-assign 100 to a;
+assign 1 to a;
+
+read[b];
+
+while(<= a b){
+    print[a];
+    assign +(a, 1) to a
+};
 
 conditional[
-    option (<= 0 2) do print[1];
-    option (>= 0 2) do print[-+(2,3)5]
-] else print[3] end;
-
-while(== 1 1)
-    print[1];
+    option(<= 1 2) do print[1]
+] end;

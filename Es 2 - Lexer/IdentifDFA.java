@@ -1,5 +1,3 @@
-package Lexer;
-
 public class IdentifDFA {
     public static boolean scan(String s){
         int state = 0;

@@ -1,5 +1,3 @@
-package Lexer;
-
 public class printDFA {
     public static boolean scan(String word){
         int state = 0;

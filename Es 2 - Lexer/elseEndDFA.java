@@ -1,5 +1,3 @@
-package Lexer;
-
 public class elseEndDFA {
     public static int scan(String word){
         int state = 0;
