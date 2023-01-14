@@ -1,8 +1,12 @@
-assign +(3, 4) to a;
+assign 1 to a;
 
-{print[2];};
+read[b];
+
+while(<= a b){
+    print[a];
+    assign +(a, 1) to a
+};
 
 conditional[
-    option (<= 0 2) do print[1];
-    option (>= 0 2) do print[2];
-] else print[3];
+    option(<= 1 2) do print[1]
+] end;
