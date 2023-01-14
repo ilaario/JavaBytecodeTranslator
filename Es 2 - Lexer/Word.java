@@ -1,3 +1,5 @@
+package Lexer;
+
 public class Word extends Token {
     public String lexeme = "";
     public Word(int tag, String s) { super(tag); lexeme=s; }
@@ -14,6 +16,8 @@ public class Word extends Token {
 	end = new Word(Tag.END, "end"),
 	print = new Word(Tag.PRINT, "print"),
 	read = new Word(Tag.READ, "read"),
+
+    //condizioni logichee
 	or = new Word(Tag.OR, "||"),
 	and = new Word(Tag.AND, "&&"),
 	lt = new Word(Tag.RELOP, "<"),
@@ -21,5 +25,6 @@ public class Word extends Token {
 	eq = new Word(Tag.RELOP, "=="),
 	le = new Word(Tag.RELOP, "<="),
 	ne = new Word(Tag.RELOP, "<>"),
-	ge = new Word(Tag.RELOP, ">=");    
+	ge = new Word(Tag.RELOP, ">="),
+	neq = new Word(Tag.RELOP, "!=");
 }

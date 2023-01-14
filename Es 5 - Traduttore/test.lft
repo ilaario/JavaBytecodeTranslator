@@ -1,19 +1,12 @@
+assign 1 to a;
 
-assign 1 to a; //assign - OK
+read[b];
 
-print[a]; //print - OK
-
-read[b]; //read - OK
-
-//while(<= a b) //while - OK
-//    print[1];
-
-//{<statlist>} - Errore
+while(<= a b){
+    print[a];
+    assign +(a, 1) to a
+};
 
 conditional[
-    option(<= 1 2) do print[a]
-] end; //cond.end - OK
-
-conditional[
-    option (<= 1 2) do print[b]
-] else print[3] end; //cond.else - OK
+    option(<= 1 2) do print[1]
+] end;

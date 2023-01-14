@@ -65,10 +65,22 @@ public class Translator {
     public void stat(int lnext_stat) {
         switch(look.tag) {
             case Tag.ASSIGN:
-                match(Tag.ASSIGN);
+                if(look.tag == Tag.ASSIGN){
+                    match(Tag.ASSIGN);
+                } else {
+                    error(Errors.n130);
+                }
                 expr();
-                match(Tag.TO);
-                match(Tag.ID);
+                if(look.tag == Tag.TO){
+                    match(Tag.TO);
+                } else {
+                    error(Errors.n130);
+                }
+                if(look.tag == Tag.ID){
+                    match(Tag.ID);
+                } else {
+                    error(Errors.n130);
+                }
                 int m_val = st.lookupAddress(Lexer.getID());
                 if (m_val == -1) {
                     code.emit(OpCode.istore, count);
@@ -79,25 +91,53 @@ public class Translator {
                 break;
 
             case Tag.PRINT:
-                match(Tag.PRINT);
-                match('[');
+                if(look.tag == Tag.PRINT){
+                    match(Tag.PRINT);
+                } else {
+                    error(Errors.n130);
+                }
+                if(look.tag == '['){
+                    match('[');
+                } else {
+                    error(Errors.n130);
+                }
                 expr();
                 code.emit(OpCode.invokestatic,1);
-                match(']');
+                if(look.tag == ']'){
+                    match(']');
+                } else {
+                    error(Errors.n130);
+                }
                 break;
 
 
             case Tag.READ:
-                match(Tag.READ);
-                match('[');
+                if(look.tag == Tag.READ){
+                    match(Tag.READ);
+                } else {
+                    error(Errors.n130);
+                }
+                if(look.tag == '['){
+                    match('[');
+                } else {
+                    error(Errors.n130);
+                }
                 if (look.tag==Tag.ID) {
                     int read_id_addr = st.lookupAddress(Lexer.getID());
                     if (read_id_addr==-1) {
                         read_id_addr = count;
                         st.insert(Lexer.getID(),count++);
                     }
-                    match(Tag.ID);
-                    match(']');
+                    if(look.tag == Tag.ID){
+                        match(Tag.ID);
+                    } else {
+                        error(Errors.n130);
+                    }
+                    if(look.tag == ']'){
+                        match(']');
+                    } else {
+                        error(Errors.n130);
+                    }
                     code.emit(OpCode.invokestatic,0);
                     code.emit(OpCode.istore,read_id_addr);
                 }
@@ -107,26 +147,35 @@ public class Translator {
 
 
             case Tag.WHILE:
-                match(Tag.WHILE);
-                if(look.tag == '(') {
+                if(look.tag == Tag.WHILE){
+                    match(Tag.WHILE);
+                } else {
+                    error(Errors.n130);
+                }
+                if(look.tag == '('){
                     match('(');
                 } else {
                     error(Errors.n130);
                 }
-                int ltrue_while = code.newLabel();
-                int lnext_while = code.newLabel();
-                code.emitLabel(ltrue_while);
-                bexpr(lnext_while, lnext_stat);
-                if (look.tag == ')'){
+                int ltrue_stat_while = code.newLabel();
+                int lnext_stat_while = code.newLabel();
+                int end_while = code.newLabel();
+                if(ltrue_stat_while!=0) {
+                    code.emit(OpCode.GOto, ltrue_stat_while);
+                }
+                code.emitLabel(ltrue_stat_while);
+                bexpr(lnext_stat_while, end_while);
+                if(look.tag == ')'){
                     match(')');
                 } else {
                     error(Errors.n130);
                 }
-                code.emitLabel(lnext_while);
-                stat(ltrue_while);
-                code.emit(OpCode.GOto, ltrue_while);
-                code.emitLabel(lnext_stat);
+                code.emitLabel(lnext_stat_while);
+                stat(ltrue_stat_while);
+                code.emit (OpCode.GOto, ltrue_stat_while);
+                code.emitLabel(end_while);
                 break;
+
 
             case Tag.COND:
                 match(Tag.COND);
@@ -160,9 +209,17 @@ public class Translator {
                 }
 
             case '{':
-                match('{');
+                if(look.tag == '{'){
+                    match('{');
+                } else {
+                    error(Errors.n130);
+                }
                 statlist(lnext_stat);
-                match('}');
+                if(look.tag == '}'){
+                    match('}');
+                } else {
+                    error(Errors.n130);
+                }
                 break;
 
             case Tag.EOF, '}':
@@ -180,7 +237,11 @@ public class Translator {
                     id_addr = count;
                     st.insert(Lexer.getID(),count++);
                 }
-                match(Tag.ID);
+                if(look.tag == Tag.ID){
+                    match(Tag.ID);
+                } else {
+                    error(Errors.n140);
+                }
 
                 idlistp(lnext_idlist);
 
@@ -203,7 +264,11 @@ public class Translator {
                     id_addr = count;
                     st.insert(((Word)look).lexeme,count++);
                 }
-                match(Tag.ID);
+                if(look.tag == Tag.ID){
+                    match(Tag.ID);
+                } else {
+                    error(Errors.n141);
+                }
                 idlistp(lnext_idlistp);
             } else {
                 error(Errors.n141);
@@ -215,7 +280,11 @@ public class Translator {
         optitem(ltrue, lfalse, lnext);
         switch (look.tag){
             case ';':
-                match(';');
+                if(look.tag == ';'){
+                    match(';');
+                } else {
+                    error(Errors.n150);
+                }
                 optlistp(ltrue, lfalse, lnext);
                 break;
 
@@ -231,7 +300,11 @@ public class Translator {
         optitem(ltrue, lfalse, lnext);
         switch (look.tag){
             case ';':
-                match(';');
+                if(look.tag == ';'){
+                    match(';');
+                } else {
+                    error(Errors.n151);
+                }
                 optlistp(ltrue, lfalse, lnext);
                 break;
 
@@ -273,37 +346,61 @@ public class Translator {
 
     private void bexpr(int ltrue, int lfalse){
         if(look == Word.eq){
-            match(Tag.RELOP);
+            if(look.tag == Tag.RELOP){
+                match(Tag.RELOP);
+            } else {
+                error(Errors.n170);
+            }
             expr();
             expr();
             code.emit(OpCode.if_icmpeq, ltrue);
             code.emit(OpCode.GOto, lfalse);
         } else if(look == Word.ne){
-            match(Tag.RELOP);
+            if(look.tag == Tag.RELOP){
+                match(Tag.RELOP);
+            } else {
+                error(Errors.n170);
+            }
             expr();
             expr();
             code.emit(OpCode.if_icmpne, ltrue);
             code.emit(OpCode.GOto, lfalse);
         } else if(look == Word.le) {
-            match(Tag.RELOP);
+            if(look.tag == Tag.RELOP){
+                match(Tag.RELOP);
+            } else {
+                error(Errors.n170);
+            }
             expr();
             expr();
             code.emit(OpCode.if_icmple, ltrue);
             code.emit(OpCode.GOto, lfalse);
         } else if(look == Word.ge) {
-            match(Tag.RELOP);
+            if(look.tag == Tag.RELOP){
+                match(Tag.RELOP);
+            } else {
+                error(Errors.n170);
+            }
             expr();
             expr();
             code.emit(OpCode.if_icmpge, ltrue);
             code.emit(OpCode.GOto, lfalse);
         } else if(look == Word.lt) {
-            match(Tag.RELOP);
+            if(look.tag == Tag.RELOP){
+                match(Tag.RELOP);
+            } else {
+                error(Errors.n170);
+            }
             expr();
             expr();
             code.emit(OpCode.if_icmplt, ltrue);
             code.emit(OpCode.GOto, lfalse);
         } else if(look == Word.gt) {
-            match(Tag.RELOP);
+            if(look.tag == Tag.RELOP){
+                match(Tag.RELOP);
+            } else {
+                error(Errors.n170);
+            }
             expr();
             expr();
             code.emit(OpCode.if_icmpgt, ltrue);
@@ -314,7 +411,11 @@ public class Translator {
     private void expr() {
         switch(look.tag) {
             case '+':
-                match('+');
+                if(look.tag == '+'){
+                    match('+');
+                } else {
+                    error(Errors.n180);
+                }
                 if(look.tag == '('){
                     match('(');
                 } else {
@@ -331,14 +432,22 @@ public class Translator {
                 break;
 
             case '-':
-                match('-');
+                if(look.tag == '-'){
+                    match('-');
+                } else {
+                    error(Errors.n180);
+                }
                 expr();
                 expr();
                 code.emit(OpCode.isub);
                 break;
 
             case '*':
-                match('*');
+                if(look.tag == '+'){
+                    match('+');
+                } else {
+                    error(Errors.n180);
+                }
                 if(look.tag == '('){
                     match('(');
                 } else {
@@ -355,7 +464,11 @@ public class Translator {
                 break;
 
             case '/':
-                match('/');
+                if(look.tag == '+'){
+                    match('+');
+                } else {
+                    error(Errors.n180);
+                }
                 expr();
                 expr();
                 code.emit(OpCode.idiv);
@@ -364,12 +477,20 @@ public class Translator {
             case Tag.NUM:
                 int num_val = Lexer.getNUM();
                 code.emit(OpCode.ldc, num_val);
-                match(Tag.NUM);
+                if(look.tag == Tag.NUM){
+                    match(Tag.NUM);
+                } else {
+                    error(Errors.n180);
+                }
                 break;
 
             case Tag.ID:
                 Token id = look;
-                match(Tag.ID);
+                if(look.tag == Tag.ID){
+                    match(Tag.ID);
+                } else {
+                    error(Errors.n180);
+                }
                 code.emit(OpCode.iload, st.lookupAddress(((Word)id).lexeme));
                 break;
         }
@@ -382,7 +503,11 @@ public class Translator {
 
     private void exprlistp(){
         if(look.tag == ','){
-            match(',');
+            if(look.tag == ','){
+                match(',');
+            } else {
+                error(Errors.n181);
+            }
             expr();
             exprlistp();
         }
@@ -400,5 +525,4 @@ public class Translator {
         } catch (IOException e) {e.printStackTrace();}
     }
 }
-
 
