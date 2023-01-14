@@ -10,3 +10,5 @@ while(<= a b){
 conditional[
     option(<= 1 2) do print[1]
 ] end;
+
+print[100];
