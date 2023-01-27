@@ -74,8 +74,11 @@ public class Lexer {
             case '/':
                 readch(br);
                 if(peek == '/'){
-                    while(peek != '\n'){
+                    while(peek != '\n' && peek != Tag.EOF){
                         readch(br);
+                        if(peek == (char)-1){
+                            return new Token(Tag.EOF);
+                        }
                     }
                     return lexical_scan(br);
                 } else if(peek == '*'){
