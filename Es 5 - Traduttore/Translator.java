@@ -63,8 +63,10 @@ public class Translator {
         }
     }
     public void stat(int lnext_stat) {
+        int opc;
         switch(look.tag) {
             case Tag.ASSIGN:
+                opc = 0;
                 if(look.tag == Tag.ASSIGN){
                     match(Tag.ASSIGN);
                 } else {
@@ -76,18 +78,7 @@ public class Translator {
                 } else {
                     error(Errors.n130);
                 }
-                if(look.tag == Tag.ID){
-                    match(Tag.ID);
-                } else {
-                    error(Errors.n130);
-                }
-                int m_val = st.lookupAddress(Lexer.getID());
-                if (m_val == -1) {
-                    code.emit(OpCode.istore, count);
-                    st.insert(Lexer.getID(), count++);
-                } else {
-                    code.emit(OpCode.istore, m_val);
-                }
+                idlist(lnext_stat, opc);
                 break;
 
             case Tag.PRINT:
@@ -112,6 +103,7 @@ public class Translator {
 
 
             case Tag.READ:
+                opc = 1;
                 if(look.tag == Tag.READ){
                     match(Tag.READ);
                 } else {
@@ -123,23 +115,13 @@ public class Translator {
                     error(Errors.n130);
                 }
                 if (look.tag==Tag.ID) {
-                    int read_id_addr = st.lookupAddress(Lexer.getID());
-                    if (read_id_addr==-1) {
-                        read_id_addr = count;
-                        st.insert(Lexer.getID(),count++);
-                    }
-                    if(look.tag == Tag.ID){
-                        match(Tag.ID);
-                    } else {
-                        error(Errors.n130);
-                    }
+                    idlist(lnext_stat, opc);
                     if(look.tag == ']'){
                         match(']');
                     } else {
                         error(Errors.n130);
                     }
-                    code.emit(OpCode.invokestatic,0);
-                    code.emit(OpCode.istore,read_id_addr);
+
                 }
                 else
                     error(Errors.n131);
@@ -157,23 +139,24 @@ public class Translator {
                 } else {
                     error(Errors.n130);
                 }
-                int ltrue_stat_while = code.newLabel();
-                int lnext_stat_while = code.newLabel();
-                int end_while = code.newLabel();
-                if(ltrue_stat_while!=0) {
-                    code.emit(OpCode.GOto, ltrue_stat_while);
-                }
-                code.emitLabel(ltrue_stat_while);
-                bexpr(lnext_stat_while, end_while);
+
+                int ltrue_while = code.newLabel();
+                int lend_while = code.newLabel();
+
+                code.emitLabel(ltrue_while);
+
+                bexpr(lend_while);
+
                 if(look.tag == ')'){
                     match(')');
                 } else {
                     error(Errors.n130);
                 }
-                code.emitLabel(lnext_stat_while);
-                stat(ltrue_stat_while);
-                code.emit (OpCode.GOto, ltrue_stat_while);
-                code.emitLabel(end_while);
+
+                stat(ltrue_while);
+                code.emit(OpCode.GOto,ltrue_while);
+                code.emitLabel(lend_while);
+
                 break;
 
 
@@ -184,21 +167,25 @@ public class Translator {
                 } else {
                     error(Errors.n130);
                 }
-                int ltrue_cond = code.newLabel();
+
+                int lnext_cond = code.newLabel();
                 int lfalse_cond = code.newLabel();
-                optlist(ltrue_cond, lfalse_cond, lnext_stat);
+
+                optlist(lfalse_cond, lnext_cond);
                 if(look.tag == ']'){
                     match(']');
                 } else {
                     error(Errors.n130);
                 }
                 if(look.tag == Tag.END){
+                    code.emitLabel(lnext_cond);
                     match(Tag.END);
                     break;
                 } else if(look.tag == Tag.ELSE){
                     match(Tag.ELSE);
                     stat(lnext_stat);
                     if(look.tag == Tag.END){
+                        code.emitLabel(lnext_cond);
                         match(Tag.END);
                         break;
                     } else {
@@ -229,7 +216,7 @@ public class Translator {
                 error(Errors.n130);
         }
     }
-    private void idlist(int lnext_idlist) {
+    private void idlist(int lnext_idlist, int opc) {
         switch(look.tag) {
             case Tag.ID:
                 int id_addr = st.lookupAddress(Lexer.getID());
@@ -237,14 +224,27 @@ public class Translator {
                     id_addr = count;
                     st.insert(Lexer.getID(),count++);
                 }
+                switch (opc){
+                    case 0:
+                        code.emit(OpCode.istore, id_addr);
+                        break;
+
+                    case 1:
+                        code.emit(OpCode.invokestatic,0);
+                        code.emit(OpCode.istore,id_addr);
+                        break;
+
+                    default:
+                        break;
+                }
+
                 if(look.tag == Tag.ID){
                     match(Tag.ID);
                 } else {
                     error(Errors.n140);
                 }
 
-                idlistp(lnext_idlist);
-
+                idlistp(lnext_idlist, opc, id_addr);
                 break;
 
             case ']':
@@ -255,37 +255,46 @@ public class Translator {
         }
     }
 
-    private void idlistp(int lnext_idlistp){
+    private void idlistp(int lnext_idlistp, int opc, int old_add){
         if(look.tag == ','){
             match(',');
             if(look.tag == Tag.ID){
-                int id_addr = st.lookupAddress(((Word)look).lexeme);
+                int id_addr = st.lookupAddress(Lexer.getID());
                 if (id_addr==-1) {
                     id_addr = count;
-                    st.insert(((Word)look).lexeme,count++);
+                    st.insert(Lexer.getID(),count++);
+                }
+                switch (opc){
+                    case 0:
+                        code.emit(OpCode.iload, old_add);
+                        code.emit(OpCode.istore, id_addr);
+                        break;
+
+                    case 1:
+                        code.emit(OpCode.invokestatic,0);
+                        code.emit(OpCode.istore,id_addr);
+                        break;
+
+                    default:
+                        break;
                 }
                 if(look.tag == Tag.ID){
                     match(Tag.ID);
                 } else {
                     error(Errors.n141);
                 }
-                idlistp(lnext_idlistp);
+                idlistp(lnext_idlistp, opc, old_add);
             } else {
                 error(Errors.n141);
             }
         }
     }
 
-    private void optlist(int ltrue, int lfalse, int lnext){
-        optitem(ltrue, lfalse, lnext);
+    private void optlist(int lfalse, int lnext){
+        optitem(lfalse, lnext);
         switch (look.tag){
-            case ';':
-                if(look.tag == ';'){
-                    match(';');
-                } else {
-                    error(Errors.n150);
-                }
-                optlistp(ltrue, lfalse, lnext);
+            case Tag.OPTION:
+                optlistp(lfalse, lnext);
                 break;
 
             case ']':
@@ -296,16 +305,12 @@ public class Translator {
         }
     }
 
-    private void optlistp(int ltrue, int lfalse, int lnext){
-        optitem(ltrue, lfalse, lnext);
+    private void optlistp(int lfalse, int lnext){
+        int lfalse_new = code.newLabel();
+        optitem(lfalse_new, lnext);
         switch (look.tag){
-            case ';':
-                if(look.tag == ';'){
-                    match(';');
-                } else {
-                    error(Errors.n151);
-                }
-                optlistp(ltrue, lfalse, lnext);
+            case Tag.OPTION:
+                optlistp(lfalse_new, lnext);
                 break;
 
             case ']':
@@ -316,7 +321,7 @@ public class Translator {
         }
     }
 
-    private void optitem(int ltrue, int lfalse, int lnext){
+    private void optitem(int lfalse, int lnext){
         if(look.tag == Tag. OPTION){
             match(Tag.OPTION);
         } else {
@@ -327,7 +332,7 @@ public class Translator {
         } else {
             error(Errors.n160);
         }
-        bexpr(ltrue, lfalse);
+        bexpr(lfalse);
         if (look.tag == ')'){
             match(')');
         } else {
@@ -338,13 +343,13 @@ public class Translator {
         } else {
             error(Errors.n160);
         }
-        code.emitLabel(ltrue);
+
         stat(lnext);
-        code.emit(OpCode.GOto,lfalse);
+        code.emit(OpCode.GOto,lnext);
         code.emitLabel(lfalse);
     }
 
-    private void bexpr(int ltrue, int lfalse){
+    private void bexpr(int lfalse){
         if(look == Word.eq){
             if(look.tag == Tag.RELOP){
                 match(Tag.RELOP);
@@ -353,9 +358,9 @@ public class Translator {
             }
             expr();
             expr();
-            code.emit(OpCode.if_icmpeq, ltrue);
-            code.emit(OpCode.GOto, lfalse);
-        } else if(look == Word.ne){
+            code.emit(OpCode.if_icmpne, lfalse);
+
+        } else if(look == Word.neq){
             if(look.tag == Tag.RELOP){
                 match(Tag.RELOP);
             } else {
@@ -363,8 +368,8 @@ public class Translator {
             }
             expr();
             expr();
-            code.emit(OpCode.if_icmpne, ltrue);
-            code.emit(OpCode.GOto, lfalse);
+            code.emit(OpCode.if_icmpeq, lfalse);
+
         } else if(look == Word.le) {
             if(look.tag == Tag.RELOP){
                 match(Tag.RELOP);
@@ -373,8 +378,8 @@ public class Translator {
             }
             expr();
             expr();
-            code.emit(OpCode.if_icmple, ltrue);
-            code.emit(OpCode.GOto, lfalse);
+            code.emit(OpCode.if_icmpgt, lfalse);
+
         } else if(look == Word.ge) {
             if(look.tag == Tag.RELOP){
                 match(Tag.RELOP);
@@ -383,8 +388,8 @@ public class Translator {
             }
             expr();
             expr();
-            code.emit(OpCode.if_icmpge, ltrue);
-            code.emit(OpCode.GOto, lfalse);
+            code.emit(OpCode.if_icmplt, lfalse);
+
         } else if(look == Word.lt) {
             if(look.tag == Tag.RELOP){
                 match(Tag.RELOP);
@@ -393,8 +398,8 @@ public class Translator {
             }
             expr();
             expr();
-            code.emit(OpCode.if_icmplt, ltrue);
-            code.emit(OpCode.GOto, lfalse);
+            code.emit(OpCode.if_icmpge, lfalse);
+
         } else if(look == Word.gt) {
             if(look.tag == Tag.RELOP){
                 match(Tag.RELOP);
@@ -403,8 +408,43 @@ public class Translator {
             }
             expr();
             expr();
-            code.emit(OpCode.if_icmpgt, ltrue);
+            code.emit(OpCode.if_icmple, lfalse);
+
+        } else if(look == Word.or){
+            if(look.tag == Tag.OR){
+                match(Tag.OR);
+            } else {
+                error(Errors.n170);
+            }
+
+            int lv = code.newLabel();
+
+
+            bexpr(lv);
+            bexpr(lv);
             code.emit(OpCode.GOto, lfalse);
+            code.emitLabel(lv);
+        } else if(look == Word.and){
+            if(look.tag == Tag.AND){
+                match(Tag.AND);
+            } else {
+                error(Errors.n170);
+            }
+
+            bexpr(lfalse);
+            bexpr(lfalse);
+        } else if(look == Word.not){
+            if(look.tag == '!'){
+                match('!');
+            } else {
+                error(Errors.n170);
+            }
+
+            int lv = code.newLabel();
+
+            bexpr(lv);
+            code.emit(OpCode.GOto, lfalse);
+            code.emitLabel(lv);
         }
 
     }
@@ -443,8 +483,8 @@ public class Translator {
                 break;
 
             case '*':
-                if(look.tag == '+'){
-                    match('+');
+                if(look.tag == '*'){
+                    match('*');
                 } else {
                     error(Errors.n180);
                 }
@@ -526,3 +566,4 @@ public class Translator {
     }
 }
 
+//Ringrazio PolPiantina per l'aiuto nello sviluppo del Translator
