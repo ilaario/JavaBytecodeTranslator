@@ -1,12 +1,9 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 
 public class Lexer {
 
     public static int line = 1;
     private char peek = ' ';
-    static String num;
     
     private void readch(BufferedReader br) {
         try {
@@ -162,65 +159,94 @@ public class Lexer {
                 return new Token(Tag.EOF);
 
             default:
-                String word = "";
-                if (Character.isLetter(peek) || peek == '_') {
-                    boolean continua = true;
-                    while(continua){
-                        if(Character.isLetter(peek) || Character.isDigit(peek) || peek == '_'){
-                            word += peek;
-                            readch(br);
-                        } else {
-                            continua = false;
+                if (lettera(peek)) {
+                    int state = 0;
+                    String s="";
+                    while (state >= 0 && (lettera(peek)||(peek >= '0' && peek <= '9'))) {
+                        switch (state) {
+                            case 0:
+                                if (lettera(peek))
+                                    state = 1;
+                                else if (peek >= '0' && peek <= '9')
+                                    state = -1;
+                                else state = -1;
+                                break;
+                            case 1:
+                                if ((peek >= '0' && peek <= '9') || lettera(peek))
+                                    state = 1;
+                                break;
                         }
+                        s=s+peek;
+                        readch(br);
+                    }
+                    if(state==1){
+                        if(s.compareTo("assign")==0)
+                            return Word.assign;
+                        else if(s.compareTo("to")==0)
+                            return Word.to;
+                        else if(s.compareTo("conditional")==0)
+                            return Word.conditional;
+                        else if(s.compareTo("option")==0)
+                            return Word.option;
+                        else if(s.compareTo("do")==0)
+                            return Word.dotok;
+                        else if(s.compareTo("else")==0)
+                            return Word.elsetok;
+                        else if(s.compareTo("while")==0)
+                            return Word.whiletok;
+                        else if(s.compareTo("begin")==0)
+                            return Word.begin;
+                        else if(s.compareTo("end")==0)
+                            return Word.end;
+                        else if(s.compareTo("print")==0)
+                            return Word.print;
+                        else  if(s.compareTo("read")==0)
+                            return Word.read;
+                        else return new Word(Tag.ID,s);
                     }
 
-                    switch (word){
-                        case "assign":          return Word.assign;
-                        case "to":              return Word.to;
-                        case "conditional":     return Word.conditional;
-                        case "option":          return Word.option;
-                        case "do":              return Word.dotok;
-                        case "else":            return Word.elsetok;
-                        case "while":           return Word.whiletok;
-                        case "begin":           return Word.begin;
-                        case "end":             return Word.end;
-                        case "print":           return Word.print;
-                        case "read":            return Word.read;
-                        default:                return new Word(Tag.ID,word);
-                    }
+
+                    // ... gestire il caso degli identificatori FATTO e delle parole chiave //
 
                 } else if (Character.isDigit(peek)) {
-                    boolean isValid = true, continua = true;
-                    while(continua){
-                        if(Character.isDigit(peek)){
-                            word += peek;
-                            readch(br);
-                        } else if ((Character.isLetter(peek) || peek == '_') && peek != ' ') {
-                            word += peek;
-                            readch(br);
-                            isValid = false;
-                        } else {
-                            continua = false;
+                    int state = 0;
+                    String n="";
+                    while (state >= 0 && Character.isDigit(peek)) {
+                        switch (state) {
+                            case 0:
+                                if (peek == '0')
+                                    state = 1;
+                                else if (peek >= '1' && peek <= '9')
+                                    state = 2;
+                                else state = -1;
+                                break;
+                            case 1:
+                                if (peek >= '0' && peek <= '9')
+                                    state = -1;
+                                else state = -1;
+                                break;
+                            case 2:
+                                if (peek >= '0' && peek <= '9')
+                                    state = 2;
+                                else state = -1;
+                                break;
                         }
+                        n=n+peek;
+                        readch(br);
                     }
-                    num = word;
-                    if(!isValid){
-                        System.err.println("Erroneous character: "
-                                + num );
-                        return null;
-                    } else {
-                        return new NumberTok(Tag.NUM, num);
-                    }
+
+                    if(state == 1 || state == 2)
+                        return new NumberTok(Tag.NUM, String.valueOf(n));
+
+
+                    // ... gestire il caso dei numeri ... FATTO //
                 } else {
                     System.err.println("Erroneous character: "
                             + peek );
                     return null;
                 }
         }
-    }
-
-    public static int getNUM(){
-        return Integer.parseInt(num);
+        return null;
     }
 		
     public static void main(String[] args) {
@@ -236,4 +262,11 @@ public class Lexer {
             br.close();
         } catch (IOException e) {e.printStackTrace();}
     }
+
+    public static boolean lettera(char ch){
+        if(ch>='a' && ch<='z') return true;
+        else if(ch>='A' && ch<='Z') return true;
+        else return false;
+    }
+
 }

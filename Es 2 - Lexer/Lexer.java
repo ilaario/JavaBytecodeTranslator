@@ -70,8 +70,11 @@ public class Lexer {
             case '/':
                 readch(br);
                 if(peek == '/'){
-                    while(peek != '\n'){
+                    while(peek != '\n' && peek != Tag.EOF){
                         readch(br);
+                        if(peek == (char)-1){
+                            return new Token(Tag.EOF);
+                        }
                     }
                     return lexical_scan(br);
                 } else if(peek == '*'){
@@ -160,120 +163,48 @@ public class Lexer {
                 return new Token(Tag.EOF);
 
             default:
+                String word = "";
                 if (Character.isLetter(peek) || peek == '_') {
                     boolean continua = true;
-                    StringBuilder wordBuild = new StringBuilder();
-                    //String word = "";
                     while(continua){
                         if(Character.isLetter(peek) || Character.isDigit(peek) || peek == '_'){
-                            wordBuild.append(peek);
-                            //word += peek;
+                            word += peek;
                             readch(br);
                         } else {
                             continua = false;
                         }
                     }
-                    String word = wordBuild.toString();
 
-                    if(!IdentifDFA.scan(word)){
-                        System.err.println("String not valid");
-                        return null;
-                    } else {
-                        switch (word.charAt(0)){
-                            case 'a':
-                                if(assignDFA.scan(word)){
-                                    return Word.assign;
-                                } else {
-                                    return new Word(Tag.ID, word);
-                                }
-
-                            case 'b':
-                                if(beginDFA.scan(word)){
-                                    return Word.begin;
-                                } else {
-                                    return new Word(Tag.ID, word);
-                                }
-
-                            case 'c':
-                                if(conditionalDFA.scan(word)){
-                                    return Word.conditional;
-                                } else {
-                                    return new Word(Tag.ID, word);
-                                }
-
-                            case 'd':
-                                if(doDFA.scan(word)){
-                                    return Word.dotok;
-                                } else {
-                                    return new Word(Tag.ID, word);
-                                }
-
-                            case 'e':
-                                int opt = elseEndDFA.scan(word);
-                                if(opt == 1){
-                                    return Word.elsetok;
-                                } else if(opt == 2){
-                                    return Word.end;
-                                } else {
-                                    return new Word(Tag.ID, word);
-                                }
-
-                            case 'o':
-                                if(optionDFA.scan(word)){
-                                    return Word.option;
-                                } else {
-                                    return new Word(Tag.ID, word);
-                                }
-
-                            case 'p':
-                                if(printDFA.scan(word)){
-                                    return Word.print;
-                                } else {
-                                    return new Word(Tag.ID,word);
-
-                                }
-
-                            case 'r':
-                                 if(readDFA.scan(word)){
-                                    return Word.read;
-                                } else {
-                                    return new Word(Tag.ID,word);
-                                }
-
-                            case 't':
-                                if(toDFA.scan(word)){
-                                    return Word.to;
-                                } else {
-                                    return new Word(Tag.ID,word);
-                                }
-
-                            case 'w':
-                                if(whileDFA.scan(word)){
-                                    return Word.whiletok;
-                                } else {
-                                    return new Word(Tag.ID,word);
-                                }
-
-                            default:
-                                return new Word(Tag.ID, word);
-                        }
+                    switch (word){
+                        case "assign":          return Word.assign;
+                        case "to":              return Word.to;
+                        case "conditional":     return Word.conditional;
+                        case "option":          return Word.option;
+                        case "do":              return Word.dotok;
+                        case "else":            return Word.elsetok;
+                        case "while":           return Word.whiletok;
+                        case "begin":           return Word.begin;
+                        case "end":             return Word.end;
+                        case "print":           return Word.print;
+                        case "read":            return Word.read;
+                        default:                return new Word(Tag.ID,word);
                     }
+
                 } else if (Character.isDigit(peek)) {
                     boolean isValid = true, continua = true;
-                    StringBuilder wordBuild = new StringBuilder();
                     while(continua){
                         if(Character.isDigit(peek)){
-                            wordBuild.append(peek);
+                            word += peek;
                             readch(br);
                         } else if ((Character.isLetter(peek) || peek == '_') && peek != ' ') {
-                            wordBuild.append(peek);
+                            word += peek;
                             readch(br);
                             isValid = false;
                         } else {
                             continua = false;
                         }
                     }
-                    num = wordBuild.toString();
+                    num = word;
                     if(!isValid){
                         System.err.println("Erroneous character: "
                                 + num );

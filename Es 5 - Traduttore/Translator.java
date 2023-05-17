@@ -29,9 +29,8 @@ public class Translator {
         }
     }
     public void prog() {
-        int lnext_prog = code.newLabel();
+        int lnext_prog = 0;
         statlist(lnext_prog);
-        code.emitLabel(lnext_prog);
         match(Tag.EOF);
         try {
             code.toJasmin();
@@ -46,7 +45,6 @@ public class Translator {
         statlistp(lnext_statlist);
 
     }
-
     private void statlistp(int lnext_statlistp){
         switch (look.tag){
             case ';':
@@ -92,7 +90,7 @@ public class Translator {
                 } else {
                     error(Errors.n130);
                 }
-                expr();
+                exprlist();
                 code.emit(OpCode.invokestatic,1);
                 if(look.tag == ']'){
                     match(']');
@@ -358,7 +356,7 @@ public class Translator {
             }
             expr();
             expr();
-            code.emit(OpCode.if_icmpne, lfalse);
+            code.emit(OpCode.if_icmpne , lfalse);
 
         } else if(look == Word.neq){
             if(look.tag == Tag.RELOP){
@@ -418,8 +416,6 @@ public class Translator {
             }
 
             int lv = code.newLabel();
-
-
             bexpr(lv);
             bexpr(lv);
             code.emit(OpCode.GOto, lfalse);
@@ -444,6 +440,26 @@ public class Translator {
 
             bexpr(lv);
             code.emit(OpCode.GOto, lfalse);
+            code.emitLabel(lv);
+        } else if(look == Word.vero){
+            if(look.tag == Tag.TRUE){
+                match(Tag.TRUE);
+            } else {
+                error(Errors.n170);
+            }
+
+            int lv = code.newLabel();
+            code.emitLabel(lv);
+
+        } else if(look == Word.falso){
+            if(look.tag == Tag.FALSE){
+                match(Tag.FALSE);
+            } else {
+                error(Errors.n170);
+            }
+
+            int lv = code.newLabel();
+            code.emit(OpCode.GOto, lv);
             code.emitLabel(lv);
         }
 
@@ -515,8 +531,7 @@ public class Translator {
                 break;
 
             case Tag.NUM:
-                int num_val = Lexer.getNUM();
-                code.emit(OpCode.ldc, num_val);
+                code.emit(OpCode.ldc, Lexer.getNUM());
                 if(look.tag == Tag.NUM){
                     match(Tag.NUM);
                 } else {
@@ -556,7 +571,7 @@ public class Translator {
     public static void main(String[] args) {
         Lexer lex = new Lexer();
 
-        String path = "/Users/ilaario/Desktop/Progetti/ProgettoLFT/Es 5 - Traduttore/test.lft"; // il percorso del file da leggere
+        String path = "/Users/ilaario/Desktop/Progetti/2° Anno/Linguaggi Formali e Traduttori/ProgettoLFT/Es 5 - Traduttore/test.lft"; // il percorso del file da leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
             Translator translator = new Translator(lex, br);

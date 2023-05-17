@@ -51,7 +51,7 @@ public class TreZeri {
         String t0 = "1100011001";
 
         String t6 = "010101";
-        String t7 = "10214";
+        String t7 = "10064";
 
         System.out.println(t0 + "\nATTESO: \tAccettato \nRISULTATO:\t" + (scan(t0) ? "Accettato" : "Errore") + "\n");
 

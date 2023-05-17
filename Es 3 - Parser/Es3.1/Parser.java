@@ -57,7 +57,7 @@ public class Parser {
                 break;
 
             default:
-                expr();
+                error("Errore sintattico");
         }
     }
 
@@ -79,7 +79,7 @@ public class Parser {
                 break;
 
             default:
-                expr();
+                error("Errore sintattico");
         }
     }
     private void fact () {

@@ -24,5 +24,7 @@ public class Word extends Token {
 	le = new Word(Tag.RELOP, "<="),
 	ne = new Word(Tag.RELOP, "<>"),
 	ge = new Word(Tag.RELOP, ">="),
-	neq = new Word(Tag.RELOP, "!=");
+	neq = new Word(Tag.RELOP, "!="),
+	vero = new Word(Tag.TRUE, "TRUE"),
+	falso = new Word(Tag.FALSE, "FALSE");
 }

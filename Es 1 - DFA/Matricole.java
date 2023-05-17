@@ -6,7 +6,8 @@ public class Matricole {
         while(i < s.length() && state >= 0){
             final int c = s.charAt(i++);
 
-            switch (state){
+            switch (state) {
+                /*
                 case 0:
                     if(c >= 48 && c <= 57){
                         int tmp = s.charAt(i);
@@ -40,7 +41,61 @@ public class Matricole {
                     }
                     break;
             }
+        }*/
+                case 0:
+                    if(c >= 48 && c <= 57){
+                        if(c % 2 != 0){
+                            state = 1;
+                        } else {
+                            state = 2;
+                        }
+                    } else {
+                        state = -1;
+                    }
+                    break;
+
+                case 1:
+                    if(c >= 48 && c <= 57){
+                        if(c % 2 != 0){
+                            state = 1;
+                        } else {
+                            state = 2;
+                        }
+                    } else {
+                        if(c >= 76 && c <= 90){
+                            state = 3;
+                        } else {
+                            state = -1;
+                        }
+                    }
+                    break;
+
+                case 2:
+                    if(c >= 48 && c <= 57){
+                        if(c % 2 != 0){
+                            state = 1;
+                        } else {
+                            state = 2;
+                        }
+                    } else {
+                        if(c >= 65 && c <= 75){
+                            state = 3;
+                        } else {
+                            state = -1;
+                        }
+                    }
+                    break;
+
+                case 3:
+                    if(c >= 97 && c <= 122){
+                        state = 3;
+                    } else {
+                        state = -1;
+                    }
+                    break;
+            }
         }
+
         return state == 3;
     }
 

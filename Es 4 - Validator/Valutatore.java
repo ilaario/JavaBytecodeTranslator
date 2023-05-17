@@ -22,8 +22,9 @@ public class Valutatore {
         if (look.tag == t) {
             if (look.tag != Tag.EOF) move();
         } else {
-            error("Errore sintattico durante il match("+ look.tag +" -> " + t +")");
-        }    }
+            error("Errore sintattico durante il match ("+ look.tag +" -> " + t +")");
+        }
+    }
 
     public void start() {
         int expr_val;

@@ -1,12 +1,4 @@
-assign 1 to a;
-
-read[b];
-
-while(<= a b){
-    print[a];
-    assign +(a, 1) to a
-};
-
-conditional[
-    option(<= 1 2) do print[1]
-] end;
+//ciao dario
+while(2 >= 1){
+    assign 123 to a;
+} //ciao

@@ -1,10 +1,9 @@
-public class
-a3finali {
+public class a3finali {
     public static boolean scan(String s){
         int state = 0;
         int i = 0;
 
-        while(i < s.length() && state <=0){
+        while(i < s.length() && state >=0){
             final char c = s.charAt(i++);
 
             switch (state){
@@ -47,10 +46,11 @@ a3finali {
                         state = -1;
                     }
                     break;
+
             }
         }
 
-        return state == 0;
+        return state == 0 || state == 1 || state == 2;
     }
 
     public static void main(String[] args){

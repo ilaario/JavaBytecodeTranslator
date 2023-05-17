@@ -45,7 +45,7 @@ public class NotTreZeri {
                     break;
             }
         }
-        return state == 0;
+        return state == 0 ;
     }
 
     public static void main(String[] args){

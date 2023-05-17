@@ -9,7 +9,7 @@ public class Lexer {
     static String num;
     static String s = "";
     static String ID = "";
-    
+
     private void readch(BufferedReader br) {
         try {
             peek = (char) br.read();
@@ -23,7 +23,7 @@ public class Lexer {
             if (peek == '\n') line++;
             readch(br);
         }
-        
+
         switch (peek) {
             case '!':
                 readch(br);
@@ -106,7 +106,7 @@ public class Lexer {
             case ',':
                 peek = ' ';
                 return Token.comma;
-	
+
             case '&':
                 readch(br);
                 if (peek == '&') {
@@ -159,7 +159,7 @@ public class Lexer {
                     System.err.println(Errors.n210);
                     return null;
                 }
-          
+
             case (char)-1:
                 return new Token(Tag.EOF);
 
@@ -183,40 +183,46 @@ public class Lexer {
                         s=s+peek;
                         readch(br);
                     }
-                    if(state==1){
-                        if(s.compareTo("assign")==0) {
+                    if(state==1) {
+                        if (s.compareTo("assign") == 0) {
                             s = "";
                             return Word.assign;
-                        }else if(s.compareTo("to")==0) {
+                        } else if (s.compareTo("to") == 0) {
                             s = "";
                             return Word.to;
-                        }else if(s.compareTo("conditional")==0) {
+                        } else if (s.compareTo("conditional") == 0) {
                             s = "";
                             return Word.conditional;
-                        }else if(s.compareTo("option")==0) {
+                        } else if (s.compareTo("option") == 0) {
                             s = "";
                             return Word.option;
-                        }else if(s.compareTo("do")==0) {
+                        } else if (s.compareTo("do") == 0) {
                             s = "";
                             return Word.dotok;
-                        }else if(s.compareTo("else")==0) {
+                        } else if (s.compareTo("else") == 0) {
                             s = "";
                             return Word.elsetok;
-                        }else if(s.compareTo("while")==0) {
+                        } else if (s.compareTo("while") == 0) {
                             s = "";
                             return Word.whiletok;
-                        }else if(s.compareTo("begin")==0) {
+                        } else if (s.compareTo("begin") == 0) {
                             s = "";
                             return Word.begin;
-                        }else if(s.compareTo("end")==0) {
+                        } else if (s.compareTo("end") == 0) {
                             s = "";
                             return Word.end;
-                        }else if(s.compareTo("print")==0) {
+                        } else if (s.compareTo("print") == 0) {
                             s = "";
                             return Word.print;
-                        }else if(s.compareTo("read")==0) {
+                        } else if (s.compareTo("read") == 0) {
                             s = "";
                             return Word.read;
+                        } else if (s.compareTo("TRUE") == 0){
+                            s = "";
+                            return Word.vero;
+                        } else if(s.compareTo("FALSE") == 0){
+                            s = "";
+                            return Word.falso;
                         }else{
                             ID = s;
                             s = "";
@@ -262,7 +268,7 @@ public class Lexer {
     }
 
     public static String getID(){ return ID; }
-		
+
     public static void main(String[] args) {
         Lexer lex = new Lexer();
         String path = "/Users/ilaario/Desktop/Progetti/ProgettoLFT/Es 2 - Lexer/Bonfiglio Dario/testLexer.txt"; // il percorso del file da leggere

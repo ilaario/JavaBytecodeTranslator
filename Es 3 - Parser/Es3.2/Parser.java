@@ -8,7 +8,8 @@ public class Parser {
     private BufferedReader pbr;
     private Token look;
 
-    public Parser(Lexer l, BufferedReader br) { lex = l;
+    public Parser(Lexer l, BufferedReader br) {
+        lex = l;
         pbr = br;
         move();
     }

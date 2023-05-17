@@ -1,14 +1,19 @@
-assign 1 to a;
-
+assign 0 to a;
 read[b];
 
-while(<= a b){
+while(< a b){
     print[a];
     assign +(a, 1) to a
 };
 
-conditional[
-    option(<= 1 2) do print[1]
-] end;
+read[c];
 
-print[100];
+conditional[
+    option(> c +(a,b)) do {
+        assign +(a, b) to d;
+        while(< d c){
+            print[d];
+            assign +(d, 1) to d
+        }
+    }
+] end

@@ -7,6 +7,7 @@ public class MatricoleSpazi {
             final int c = s.charAt(i++);
 
             switch (state) {
+                /*
                 case 0:
                     if(c==32){
                         state = 0;
@@ -19,7 +20,7 @@ public class MatricoleSpazi {
                     if(c >= 48 && c <= 57){
                         int tmp = s.charAt(i+1);
                         if((tmp >= 97 && tmp <= 122) || ( tmp >= 65 && tmp <= 90)){
-                            if(c%2==0){
+                            if(c%2 == 0){
                                 state = 2;
                             } else {
                                 state = 3;
@@ -46,10 +47,80 @@ public class MatricoleSpazi {
                     } else {
                         state = -1;
                     }
+                    break; */
+                case 0:
+                    if(c == 32){
+                        state = 0;
+                    }  else if (c >= 48 && c <= 57) {
+                        state = 1;
+                    } else {
+                        state = -1;
+                    }
                     break;
+
+                case 1:
+                    if(c >= 48 && c <= 57){
+                        if(c % 2 != 0){
+                            state = 2;
+                        } else {
+                            state = 3;
+                        }
+                    } else {
+                        state = -1;
+                    }
+                    break;
+
+                case 2:
+                    if(c >= 48 && c <= 57){
+                        if(c%2 != 0){
+                            state = 2;
+                        } else {
+                            state = 3;
+                        }
+                    } else if(c == 32){
+                        state = 4;
+                    }
+                    break;
+
+                case 3:
+                    if(c >= 48 && c <= 57){
+                        if(c%2 != 0){
+                            state = 2;
+                        } else {
+                            state = 3;
+                        }
+                    } else if(c == 32){
+                        state = 5;
+                    }
+                    break;
+
+                case 4:
+                    if(c == 32){
+                        state = 4;
+                    } else if(c >= 76 && c <= 90){
+                        state = 6;
+                    }
+                    break;
+
+                case 5:
+                    if(c == 32){
+                        state = 5;
+                    } else if(c >= 65 && c <= 75){
+                        state = 6;
+                    }
+                    break;
+
+                case 6:
+                    if((c >= 97 && c <= 122) || (c >= 65 && c <= 90) || c == 32){
+                        state = 6;
+                    } else {
+                        state = -1;
+                    }
+                    break;
+
             }
         }
-        return state == 4;
+        return state == 6;
     }
 
     public static void main(String[] args){
