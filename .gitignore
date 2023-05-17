@@ -8,6 +8,7 @@
 *.j
 *.jar
 *.txt
+*.lft
 
 #ignora la cartella out
 out/
