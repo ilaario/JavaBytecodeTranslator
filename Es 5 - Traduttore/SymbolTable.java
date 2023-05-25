@@ -2,7 +2,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SymbolTable {
-    Map<String, Integer> OffsetMap = new HashMap<String,Integer>();
+    Map<String, Integer> OffsetMap = new HashMap<>();
     public void insert(String s, int address) {
         if(!OffsetMap.containsValue(address)){
             OffsetMap.put(s,address);
@@ -12,11 +12,6 @@ public class SymbolTable {
     }
 
     public int lookupAddress (String s) {
-        if( OffsetMap.containsKey(s)){
-            return OffsetMap.get(s);
-        } else {
-            return -1;
-
-        }
+        return OffsetMap.getOrDefault(s, -1);
     }
 }

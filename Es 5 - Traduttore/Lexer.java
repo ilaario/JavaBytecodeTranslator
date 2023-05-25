@@ -25,7 +25,7 @@ public class Lexer {
         }
 
         switch (peek) {
-            case '!':
+            case '!' -> {
                 readch(br);
                 if (peek == '=') {
                     peek = ' ';
@@ -34,60 +34,60 @@ public class Lexer {
                     peek = ' ';
                     return Token.not;
                 }
-
-            case '(':
+            }
+            case '(' -> {
                 peek = ' ';
                 return Token.lpt;
-
-            case ')':
+            }
+            case ')' -> {
                 peek = ' ';
                 return Token.rpt;
-
-            case '[':
+            }
+            case '[' -> {
                 peek = ' ';
                 return Token.lpq;
-
-            case ']':
+            }
+            case ']' -> {
                 peek = ' ';
                 return Token.rpq;
-
-            case '{':
+            }
+            case '{' -> {
                 peek = ' ';
                 return Token.lpg;
-
-            case '}':
+            }
+            case '}' -> {
                 peek = ' ';
                 return Token.rpg;
-
-            case '+':
+            }
+            case '+' -> {
                 peek = ' ';
                 return Token.plus;
-
-            case '-':
+            }
+            case '-' -> {
                 peek = ' ';
                 return Token.minus;
-
-            case '*':
+            }
+            case '*' -> {
                 peek = ' ';
                 return Token.mult;
-
-            case '/':
+            }
+            case '/' -> {
                 readch(br);
-                if(peek == '/'){
-                    while(peek != '\n' && peek != Tag.EOF){
+                if (peek == '/') {
+                    while (peek != '\n') {
                         readch(br);
-                        if(peek == (char)-1){
+                        if (peek == (char) -1) {
                             return new Token(Tag.EOF);
                         }
                     }
                     return lexical_scan(br);
-                } else if(peek == '*'){
+                } else if (peek == '*') {
                     boolean continua = true;
-                    while(continua){
+                    while (continua) {
                         readch(br);
-                        if(peek == '*'){
+                        if (peek == '*') {
                             readch(br);
-                            if(peek == '/'){
+                            if (peek == '/') {
                                 continua = false;
                             }
                         }
@@ -98,16 +98,16 @@ public class Lexer {
                     peek = ' ';
                     return Token.div;
                 }
-
-            case ';':
+            }
+            case ';' -> {
                 peek = ' ';
                 return Token.semicolon;
-
-            case ',':
+            }
+            case ',' -> {
                 peek = ' ';
                 return Token.comma;
-
-            case '&':
+            }
+            case '&' -> {
                 readch(br);
                 if (peek == '&') {
                     peek = ' ';
@@ -116,74 +116,72 @@ public class Lexer {
                     System.err.println(Errors.n210);
                     return null;
                 }
-
-            case '|':
+            }
+            case '|' -> {
                 readch(br);
-                if(peek == '|'){
+                if (peek == '|') {
                     peek = ' ';
                     return Word.or;
                 } else {
                     System.err.println(Errors.n210);
                     return null;
                 }
-
-            case '<':
+            }
+            case '<' -> {
                 readch(br);
-                if(peek == '='){
+                if (peek == '=') {
                     peek = ' ';
                     return Word.le;
-                } else if(peek == '>'){
+                } else if (peek == '>') {
                     peek = ' ';
                     return Word.ne;
                 } else {
                     peek = ' ';
                     return Word.lt;
                 }
-
-            case '>':
+            }
+            case '>' -> {
                 readch(br);
-                if(peek == '='){
+                if (peek == '=') {
                     peek = ' ';
                     return Word.ge;
                 } else {
                     peek = ' ';
                     return Word.gt;
                 }
-
-            case '=':
+            }
+            case '=' -> {
                 readch(br);
-                if(peek == '='){
+                if (peek == '=') {
                     peek = ' ';
                     return Word.eq;
                 } else {
                     System.err.println(Errors.n210);
                     return null;
                 }
-
-            case (char)-1:
+            }
+            case (char) -1 -> {
                 return new Token(Tag.EOF);
-
-            default:
+            }
+            default -> {
                 if (lettera(peek)) {
                     int state = 0;
-                    while (state >= 0 && (lettera(peek)||(peek >= '0' && peek <= '9'))) {
+                    while (state >= 0 && (lettera(peek) || (peek >= '0' && peek <= '9'))) {
                         switch (state) {
-                            case 0:
+                            case 0 -> {
                                 if (lettera(peek))
                                     state = 1;
                                 else if (peek >= '0' && peek <= '9')
                                     state = -1;
                                 else state = -1;
-                                break;
-                            case 1:
-                                if ((peek >= '0' && peek <= '9') || lettera(peek))
-                                    state = 1;
-                                break;
+                            }
+                            case 1 -> {
+                            }
                         }
-                        s=s+peek;
+                        s = s + peek;
                         readch(br);
                     }
-                    if(state==1) {
+                    if (state == 1) {
                         if (s.compareTo("assign") == 0) {
                             s = "";
                             return Word.assign;
@@ -217,16 +215,16 @@ public class Lexer {
                         } else if (s.compareTo("read") == 0) {
                             s = "";
                             return Word.read;
-                        } else if (s.compareTo("TRUE") == 0){
+                        } else if (s.compareTo("TRUE") == 0) {
                             s = "";
                             return Word.vero;
-                        } else if(s.compareTo("FALSE") == 0){
+                        } else if (s.compareTo("FALSE") == 0) {
                             s = "";
                             return Word.falso;
-                        }else{
+                        } else {
                             ID = s;
                             s = "";
-                            return new Word(Tag.ID,ID);
+                            return new Word(Tag.ID, ID);
                         }
                     }
 
@@ -236,8 +234,8 @@ public class Lexer {
                 } else if (Character.isDigit(peek)) {
                     boolean isValid = true, continua = true;
                     StringBuilder wordBuild = new StringBuilder();
-                    while(continua){
-                        if(Character.isDigit(peek)){
+                    while (continua) {
+                        if (Character.isDigit(peek)) {
                             wordBuild.append(peek);
                             readch(br);
                         } else if ((Character.isLetter(peek) || peek == '_') && peek != ' ') {
@@ -249,7 +247,7 @@ public class Lexer {
                         }
                     }
                     num = wordBuild.toString();
-                    if(!isValid){
+                    if (!isValid) {
                         System.err.println(Errors.n220);
                         return null;
                     } else {
@@ -259,6 +257,7 @@ public class Lexer {
                     System.err.println(Errors.n230);
                     return null;
                 }
+            }
         }
         return null;
     }
@@ -285,8 +284,7 @@ public class Lexer {
 
     public static boolean lettera(char ch){
         if(ch>='a' && ch<='z') return true;
-        else if(ch>='A' && ch<='Z') return true;
-        else return false;
+        else return ch >= 'A' && ch <= 'Z';
     }
 
 }

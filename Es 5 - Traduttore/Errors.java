@@ -11,7 +11,6 @@ public class Errors {
     public static final String n160 = "Errore n. 160 -> Errore di sintassi (Translator.optitem)";
     public static final String n170 = "Errore n. 170 -> Errore di sintassi (Translator.bexpr)";
     public static final String n180 = "Errore n. 180 -> Errore di sintassi (Translator.expr)";
-    public static final String n181 = "Errore n. 181 -> Errore di sintassi (Translator.exprlistp)";
     public static final String n190 = "Errore n. 190 -> Errore durante il matching (Translator.match)";
     //errori per Lexer
     public static final String n210 = "Errore n. 210 -> Simbolo non valido (Lexer.scan)";
