@@ -1,203 +1,178 @@
 import java.io.*;
-public class Translator {
+public class Translator{
     private final Lexer lex;
     private final BufferedReader pbr;
     private Token look;
+    private final boolean debugMode;
+    int count = 0;
 
     SymbolTable st = new SymbolTable();
     CodeGenerator code = new CodeGenerator();
-    int count = 0;
-    public Translator(Lexer l, BufferedReader br) {
+
+    public Translator(Lexer l, BufferedReader br, boolean debug) throws LexerException {
         lex = l;
         pbr = br;
+        debugMode = debug;
         move();
     }
-    void move() {
+
+    void move() throws LexerException {
         look = lex.lexical_scan(pbr);
-        System.out.println("token = " + look);
+        if (debugMode) System.out.println("token = " + look);
     }
-    void error(String s) {
-        throw new Error("Linea n." + Lexer.line + ": " + s);
-    }
-    void match(int t) {
+
+
+    void match(int t) throws TranslatorException, LexerException {
         if (look.tag == t) {
             if (look.tag != Tag.EOF){
                 move();
             }
         } else{
-            error(Errors.n190);
+            throw new TranslatorException(new Throwable(" Syntax error in line " + lex.line + ": expected " + t + " found " + look.tag));
         }
     }
-    public void prog() {
-        statlist();
-        match(Tag.EOF);
+    public void prog() throws TranslatorException {
+        try{
+            statlist();
+            match(Tag.EOF);
+        } catch (Exception e){
+            throw new TranslatorException(e);
+        }
+
         try {
             code.toJasmin();
         }
         catch(java.io.IOException e) {
-            System.out.println(Errors.n110);
+            throw new TranslatorException(e);
         }
     }
 
-    private void statlist(){
-        stat();
-        statlistp();
-
+    private void statlist() throws TranslatorException{
+        try{
+            stat();
+            statlistp();
+        } catch (Exception e){
+            throw new TranslatorException(e);
+        }
     }
-    private void statlistp(){
-        switch (look.tag){
-            case ';':
+    private void statlistp() throws TranslatorException{
+        try{
+            if (look.tag == ';') {
                 match(';');
                 stat();
                 statlistp();
-                break;
-
-            case Tag.EOF, '}':
-                break;
-
-            default:
-                error(Errors.n120);
+            }
+        } catch (Exception e){
+            throw new TranslatorException(e);
         }
     }
-    public void stat() {
-        int opc;
-        switch(look.tag) {
-            case Tag.ASSIGN:
-                opc = 0;
-                match(Tag.ASSIGN);
-                expr();
-                if(look.tag == Tag.TO){
+    public void stat() throws TranslatorException{
+        try{
+            int opc;
+            switch(look.tag) {
+                case Tag.ASSIGN:
+                    opc = 0;
+                    match(Tag.ASSIGN);
+                    expr();
                     match(Tag.TO);
-                } else {
-                    error(Errors.n130);
-                }
-                idlist(opc);
-                break;
-
-            case Tag.PRINT:
-                match(Tag.PRINT);
-                if(look.tag == '['){
-                    match('[');
-                } else {
-                    error(Errors.n130);
-                }
-                exprlist();
-                code.emit(OpCode.invokestatic,1);
-                if(look.tag == ']'){
-                    match(']');
-                } else {
-                    error(Errors.n130);
-                }
-                break;
-
-
-            case Tag.READ:
-                opc = 1;
-                match(Tag.READ);
-                if(look.tag == '['){
-                    match('[');
-                } else {
-                    error(Errors.n130);
-                }
-                if (look.tag==Tag.ID) {
                     idlist(opc);
-                    if(look.tag == ']'){
-                        match(']');
-                    } else {
-                        error(Errors.n130);
-                    }
+                    break;
 
-                }
-                else
-                    error(Errors.n131);
-                break;
-
-
-            case Tag.WHILE:
-                match(Tag.WHILE);
-                if(look.tag == '('){
-                    match('(');
-                } else {
-                    error(Errors.n130);
-                }
-
-                int ltrue_while = code.newLabel();
-                int lend_while = code.newLabel();
-
-                code.emitLabel(ltrue_while);
-
-                bexpr(lend_while);
-
-                if(look.tag == ')'){
-                    match(')');
-                } else {
-                    error(Errors.n130);
-                }
-
-                stat();
-                code.emit(OpCode.GOto,ltrue_while);
-                code.emitLabel(lend_while);
-
-                break;
-
-
-            case Tag.COND:
-                match(Tag.COND);
-                if(look.tag == '[') {
+                case Tag.PRINT:
+                    match(Tag.PRINT);
                     match('[');
-                } else {
-                    error(Errors.n130);
-                }
-
-                int lnext_cond = code.newLabel();
-                int lfalse_cond = code.newLabel();
-
-                optlist(lfalse_cond, lnext_cond);
-                if(look.tag == ']'){
+                    exprlist();
+                    code.emit(OpCode.invokestatic,1);
                     match(']');
-                } else {
-                    error(Errors.n130);
-                }
+                    break;
+
+
+                case Tag.READ:
+                    opc = 1;
+                    match(Tag.READ);
+                    match('[');
+                    if (look.tag==Tag.ID) {
+                        idlist(opc);
+                        match(']');
+                    }
+                    else
+                        throw new TranslatorException(new Throwable("Error in grammar (stat) after read"));
+                    break;
+
+
+                case Tag.WHILE:
+                    match(Tag.WHILE);
+                    match('(');
+
+                    int ltrue_while = code.newLabel();
+                    int lend_while = code.newLabel();
+
+                    code.emitLabel(ltrue_while);
+
+                    bexpr(lend_while);
+                    match(')');
+
+                    stat();
+                    code.emit(OpCode.GOto,ltrue_while);
+                    code.emitLabel(lend_while);
+
+                    break;
+
+
+                case Tag.COND:
+                    match(Tag.COND);
+                    match('[');
+
+                    int lnext_cond = code.newLabel();
+                    int lfalse_cond = code.newLabel();
+
+                    optlist(lfalse_cond, lnext_cond);
+                    match(']');
+
+                    condp(lnext_cond);
+                    break;
+
+                case '{':
+                    match('{');
+                    statlist();
+                    match('}');
+                    break;
+
+                case Tag.EOF, '}':
+                    break;
+
+                default:
+                    throw new TranslatorException(new Throwable("Error in grammar (stat)"));
+            }
+        }
+        catch (Exception e){
+            throw new TranslatorException(e);
+        }
+    }
+
+    private void condp(int lnext_cond) throws TranslatorException{
+        try{
+            if(look.tag == Tag.END){
+                code.emitLabel(lnext_cond);
+                match(Tag.END);
+            } else if(look.tag == Tag.ELSE){
+                match(Tag.ELSE);
+                stat();
                 if(look.tag == Tag.END){
                     code.emitLabel(lnext_cond);
                     match(Tag.END);
-                    break;
-                } else if(look.tag == Tag.ELSE){
-                    match(Tag.ELSE);
-                    stat();
-                    if(look.tag == Tag.END){
-                        code.emitLabel(lnext_cond);
-                        match(Tag.END);
-                        break;
-                    } else {
-                        error(Errors.n130);
-                    }
                 } else {
-                    error(Errors.n130);
+                    throw new TranslatorException(new Throwable("Error in grammar (stat) after else"));
                 }
-
-            case '{':
-                if(look.tag == '{'){
-                    match('{');
-                } else {
-                    error(Errors.n130);
-                }
-                statlist();
-                if(look.tag == '}'){
-                    match('}');
-                } else {
-                    error(Errors.n130);
-                }
-                break;
-
-            case Tag.EOF, '}':
-                break;
-
-            default:
-                error(Errors.n130);
+            } else {
+                throw new TranslatorException(new Throwable("Error in grammar (stat) after cond"));
+            }
+        } catch (Exception e){
+            throw new TranslatorException(e);
         }
     }
-    private void idlist(int opc) {
+
+    private void idlist(int opc) throws TranslatorException, LexerException {
         switch(look.tag) {
             case Tag.ID:
                 int id_addr = st.lookupAddress(Lexer.getID());
@@ -215,12 +190,7 @@ public class Translator {
                     }
                 }
 
-                if(look.tag == Tag.ID){
-                    match(Tag.ID);
-                } else {
-                    error(Errors.n140);
-                }
-
+                match(Tag.ID);
                 idlistp(opc, id_addr);
                 break;
 
@@ -228,11 +198,11 @@ public class Translator {
                 break;
 
             default:
-                error(Errors.n140);
+                throw new TranslatorException(new Throwable("Error in grammar (idlist)"));
         }
     }
 
-    private void idlistp(int opc, int old_add){
+    private void idlistp(int opc, int old_add) throws TranslatorException, LexerException {
         if(look.tag == ','){
             match(',');
             if(look.tag == Tag.ID){
@@ -253,21 +223,17 @@ public class Translator {
                     default -> {
                     }
                 }
-                if(look.tag == Tag.ID){
-                    match(Tag.ID);
-                } else {
-                    error(Errors.n141);
-                }
+                match(Tag.ID);
                 idlistp(opc, old_add);
             } else {
-                error(Errors.n141);
+                throw new TranslatorException(new Throwable("Error in grammar (idlistp)"));
             }
         }
     }
 
-    private void optlist(int lfalse, int lnext){
+    private void optlist(int lfalse, int lnext) throws TranslatorException, LexerException {
         optitem(lfalse, lnext);
-        switch (look.tag){
+        switch (look.tag) {
             case Tag.OPTION:
                 optlistp(lnext);
                 break;
@@ -276,11 +242,11 @@ public class Translator {
                 break;
 
             default:
-                error(Errors.n150);
+                throw new TranslatorException(new Throwable("Error in grammar (optlist)"));
         }
     }
 
-    private void optlistp(int lnext){
+    private void optlistp(int lnext) throws TranslatorException, LexerException {
         int lfalse_new = code.newLabel();
         optitem(lfalse_new, lnext);
         switch (look.tag){
@@ -292,170 +258,96 @@ public class Translator {
                 break;
 
             default:
-                error(Errors.n151);
+                throw new TranslatorException(new Throwable("Error in grammar (optlistp)"));
         }
     }
 
-    private void optitem(int lfalse, int lnext){
-        if(look.tag == Tag. OPTION){
-            match(Tag.OPTION);
-        } else {
-            error(Errors.n160);
-        }
-        if(look.tag == '(') {
-            match('(');
-        } else {
-            error(Errors.n160);
-        }
+    private void optitem(int lfalse, int lnext) throws TranslatorException, LexerException {
+        match(Tag.OPTION);
+        match('(');
         bexpr(lfalse);
-        if (look.tag == ')'){
-            match(')');
-        } else {
-            error(Errors.n160);
-        }
-        if(look.tag == Tag.DO){
-            match(Tag.DO);
-        } else {
-            error(Errors.n160);
-        }
-
+        match(')');
+        match(Tag.DO);
         stat();
         code.emit(OpCode.GOto,lnext);
         code.emitLabel(lfalse);
     }
 
-    private void bexpr(int lfalse){
+    private void bexpr(int lfalse) throws TranslatorException, LexerException {
         if(look == Word.eq){
-            if(look.tag == Tag.RELOP){
-                match(Tag.RELOP);
-            } else {
-                error(Errors.n170);
-            }
+            match(Tag.RELOP);
             expr();
             expr();
             code.emit(OpCode.if_icmpne , lfalse);
 
-        } else if(look == Word.neq){
-            if(look.tag == Tag.RELOP){
-                match(Tag.RELOP);
-            } else {
-                error(Errors.n170);
-            }
+        } else if(look == Word.ne){
+            match(Tag.RELOP);
             expr();
             expr();
             code.emit(OpCode.if_icmpeq, lfalse);
 
         } else if(look == Word.le) {
-            if(look.tag == Tag.RELOP){
-                match(Tag.RELOP);
-            } else {
-                error(Errors.n170);
-            }
+            match(Tag.RELOP);
             expr();
             expr();
             code.emit(OpCode.if_icmpgt, lfalse);
 
         } else if(look == Word.ge) {
-            if(look.tag == Tag.RELOP){
-                match(Tag.RELOP);
-            } else {
-                error(Errors.n170);
-            }
+            match(Tag.RELOP);
             expr();
             expr();
             code.emit(OpCode.if_icmplt, lfalse);
 
         } else if(look == Word.lt) {
-            if(look.tag == Tag.RELOP){
-                match(Tag.RELOP);
-            } else {
-                error(Errors.n170);
-            }
+            match(Tag.RELOP);
             expr();
             expr();
             code.emit(OpCode.if_icmpge, lfalse);
 
         } else if(look == Word.gt) {
-            if(look.tag == Tag.RELOP){
-                match(Tag.RELOP);
-            } else {
-                error(Errors.n170);
-            }
+            match(Tag.RELOP);
             expr();
             expr();
             code.emit(OpCode.if_icmple, lfalse);
 
         } else if(look == Word.or){
-            if(look.tag == Tag.OR){
-                match(Tag.OR);
-            } else {
-                error(Errors.n170);
-            }
-
+            match(Tag.OR);
             int lv = code.newLabel();
             bexpr(lv);
             bexpr(lv);
             code.emit(OpCode.GOto, lfalse);
             code.emitLabel(lv);
         } else if(look == Word.and){
-            if(look.tag == Tag.AND){
-                match(Tag.AND);
-            } else {
-                error(Errors.n170);
-            }
-
+            match(Tag.AND);
             bexpr(lfalse);
             bexpr(lfalse);
         } else if(look == Word.not){
-            if(look.tag == '!'){
-                match('!');
-            } else {
-                error(Errors.n170);
-            }
-
+            match('!');
             int lv = code.newLabel();
 
             bexpr(lv);
             code.emit(OpCode.GOto, lfalse);
             code.emitLabel(lv);
         } else if(look == Word.vero){
-            if(look.tag == Tag.TRUE){
-                match(Tag.TRUE);
-            } else {
-                error(Errors.n170);
-            }
-
+            match(Tag.TRUE);
             int lv = code.newLabel();
             code.emitLabel(lv);
 
         } else if(look == Word.falso){
-            if(look.tag == Tag.FALSE){
-                match(Tag.FALSE);
-            } else {
-                error(Errors.n170);
-            }
-
+            match(Tag.FALSE);
             int lv = code.newLabel();
             code.emit(OpCode.GOto, lv);
             code.emitLabel(lv);
         }
 
     }
-    private void expr() {
+    private void expr() throws TranslatorException, LexerException {
         switch (look.tag) {
             case '+' -> {
                 match('+');
-                if (look.tag == '(') {
-                    match('(');
-                } else {
-                    error(Errors.n180);
-                }
+                match('(');
                 exprlist();
-                if (look.tag == ')') {
-                    match(')');
-                } else {
-                    error(Errors.n180);
-                }
+                match(')');
                 code.emit(OpCode.iadd);
             }
             case '-' -> {
@@ -466,32 +358,21 @@ public class Translator {
             }
             case '*' -> {
                 match('*');
-                if (look.tag == '(') {
-                    match('(');
-                } else {
-                    error(Errors.n180);
-                }
+                match('(');
                 exprlist();
-                if (look.tag == ')') {
-                    match(')');
-                } else {
-                    error(Errors.n180);
-                }
+                match(')');
                 code.emit(OpCode.imul);
             }
             case '/' -> {
-                error(Errors.n180);
+                match('/');
                 expr();
                 expr();
                 code.emit(OpCode.idiv);
             }
             case Tag.NUM -> {
                 code.emit(OpCode.ldc, Lexer.getNUM());
-                if (look.tag == Tag.NUM) {
-                    match(Tag.NUM);
-                } else {
-                    error(Errors.n180);
-                }
+                match(Tag.NUM);
+
             }
             case Tag.ID -> {
                 Token id = look;
@@ -501,12 +382,12 @@ public class Translator {
         }
     }
 
-    private void exprlist(){
+    private void exprlist() throws TranslatorException, LexerException {
         expr();
         exprlistp();
     }
 
-    private void exprlistp(){
+    private void exprlistp() throws TranslatorException, LexerException {
         if(look.tag == ','){
             match(',');
             expr();
@@ -516,14 +397,51 @@ public class Translator {
 
     public static void main(String[] args) {
         Lexer lex = new Lexer();
-
-        String path = "/Users/ilaario/Desktop/Progetti/2° Anno/Linguaggi Formali e Traduttori/ProgettoLFT/Es 5 - Traduttore/test.lft"; // il percorso del file da leggere
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(path));
-            Translator translator = new Translator(lex, br);
-            translator.prog();
-            br.close();
-        } catch (IOException e) {e.printStackTrace();}
+        if (args.length == 0) {
+            System.err.println("main(): File not found! \nUsage: java Translator <input file>");
+        } else if (args.length == 1) {
+            String path = args[0]; // il percorso del file da leggere
+            try {
+                System.out.println("Compiling " + path + "...");
+                BufferedReader br = new BufferedReader(new FileReader(path));
+                Translator translator = new Translator(lex, br, false);
+                try{
+                    try {
+                        translator.prog();
+                        br.close();
+                    } catch (TranslatorException e) {
+                        br.close();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } catch (LexerException | FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            System.out.println("Done!");
+        } else if (args.length == 2) {
+            String path = args[0]; // il percorso del file da leggere
+            try {
+                System.out.println("Compiling " + path + "...");
+                BufferedReader br = new BufferedReader(new FileReader(path));
+                Translator translator = new Translator(lex, br, Boolean.parseBoolean(args[1]));
+                try{
+                    try {
+                        translator.prog();
+                        br.close();
+                    } catch (TranslatorException e) {
+                        br.close();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } catch (LexerException | FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            System.out.println("Done!");
+        } else {
+            System.out.println("Too many arguments");
+        }
     }
 }
 

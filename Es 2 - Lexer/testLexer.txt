@@ -1,4 +1,0 @@
-//ciao dario
-while(2 >= 1){
-    assign 123 to a;
-} //ciao

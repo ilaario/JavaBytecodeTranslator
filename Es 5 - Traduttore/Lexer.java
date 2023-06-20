@@ -18,7 +18,7 @@ public class Lexer {
         }
     }
 
-    public Token lexical_scan(BufferedReader br) {
+    public Token lexical_scan(BufferedReader br) throws LexerException{
         while (peek == ' ' || peek == '\t' || peek == '\n'  || peek == '\r') {
             if (peek == '\n') line++;
             readch(br);
@@ -113,8 +113,7 @@ public class Lexer {
                     peek = ' ';
                     return Word.and;
                 } else {
-                    System.err.println(Errors.n210);
-                    return null;
+                    throw new LexerException(new Throwable("Erroneous character after & : "  + peek ));
                 }
             }
             case '|' -> {
@@ -123,8 +122,7 @@ public class Lexer {
                     peek = ' ';
                     return Word.or;
                 } else {
-                    System.err.println(Errors.n210);
-                    return null;
+                    throw new LexerException(new Throwable("Erroneous character after | : "  + peek ));
                 }
             }
             case '<' -> {
@@ -156,8 +154,7 @@ public class Lexer {
                     peek = ' ';
                     return Word.eq;
                 } else {
-                    System.err.println(Errors.n210);
-                    return null;
+                    throw new LexerException(new Throwable("Erroneous character after = : "  + peek ));
                 }
             }
             case (char) -1 -> {
@@ -248,14 +245,12 @@ public class Lexer {
                     }
                     num = wordBuild.toString();
                     if (!isValid) {
-                        System.err.println(Errors.n220);
-                        return null;
+                        throw new LexerException(new Throwable("Erroneous number : " + peek));
                     } else {
                         return new NumberTok(Tag.NUM, num);
                     }
                 } else {
-                    System.err.println(Errors.n230);
-                    return null;
+                    throw new LexerException(new Throwable("Erroneous character : " + peek));
                 }
             }
         }
@@ -274,11 +269,15 @@ public class Lexer {
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
             Token tok;
-            do {
-                tok = lex.lexical_scan(br);
-                System.out.println("Scan: " + tok);
-            } while (tok.tag != Tag.EOF);
-            br.close();
+            try{
+                do {
+                    tok = lex.lexical_scan(br);
+                    System.out.println("Scan: " + tok);
+                }while (tok.tag != Tag.EOF);
+                br.close();
+            } catch (LexerException e) {
+                br.close();
+            }
         } catch (IOException e) {e.printStackTrace();}
     }
 

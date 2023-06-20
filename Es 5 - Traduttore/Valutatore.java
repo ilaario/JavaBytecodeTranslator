@@ -4,13 +4,13 @@ public class Valutatore {
     private final BufferedReader pbr;
     private Token look;
 
-    public Valutatore(Lexer l, BufferedReader br) {
+    public Valutatore(Lexer l, BufferedReader br) throws LexerException {
         lex = l;
         pbr = br;
         move();
     }
 
-    void move() {
+    void move() throws LexerException {
         look = lex.lexical_scan(pbr);
         System.out.println("token = " + look);    }
 
@@ -18,14 +18,14 @@ public class Valutatore {
         throw new Error("Linea n." + Lexer.line + ": " + s);
     }
 
-    void match(int t) {
+    void match(int t) throws LexerException {
         if (look.tag == t) {
             if (look.tag != Tag.EOF) move();
         } else {
             error("Errore sintattico durante il match("+ look.tag +" -> " + t +")");
         }    }
 
-    public void start() {
+    public void start() throws LexerException {
         int expr_val;
         switch (look.tag) {
             case Tag.NUM, '(' -> {
@@ -37,7 +37,7 @@ public class Valutatore {
         }
     }
 
-    private int expr() {
+    private int expr() throws LexerException {
         int term_val, expr_val, exprp_val;
         term_val = term();
         exprp_val = exprp(term_val);
@@ -45,13 +45,13 @@ public class Valutatore {
         return expr_val;
     }
 
-    private int term() {
+    private int term() throws LexerException {
         int termp_val;
         termp_val = termp(fact());
         return termp_val;
     }
 
-    private int exprp(int exprp_i) {
+    private int exprp(int exprp_i) throws LexerException {
         int term_val, exprp_val;
 
         switch (look.tag) {
@@ -74,7 +74,7 @@ public class Valutatore {
         }
     }
 
-    private int termp(int termp_i) {
+    private int termp(int termp_i) throws LexerException {
         int fact_val, termp_val;
 
         switch (look.tag) {
@@ -97,7 +97,7 @@ public class Valutatore {
         }
     }
 
-    private int fact() {
+    private int fact() throws LexerException {
         int fact_val, expr_val;
         switch(look.tag){
             case '(':
@@ -129,9 +129,15 @@ public class Valutatore {
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
             Valutatore valutatore = new Valutatore(lex, br);
-            valutatore.start();
-            br.close();
-        } catch (IOException e) {e.printStackTrace();}
+            try{
+                valutatore.start();
+                br.close();
+            } catch (LexerException e) {
+                br.close();
+            }
+        } catch (IOException e) {e.printStackTrace();} catch (LexerException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
 

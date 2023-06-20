@@ -1,3 +1,0 @@
-assign 1 to a;
-
-read[b
