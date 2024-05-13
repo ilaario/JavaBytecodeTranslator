@@ -1,6 +1,5 @@
-
 public class Word extends Token {
-    public String lexeme = "";
+    public String lexeme;
     public Word(int tag, String s) { super(tag); lexeme=s; }
     public String toString() { return "<" + tag + ", " + lexeme + ">"; }
     public static final Word
@@ -25,5 +24,7 @@ public class Word extends Token {
 	le = new Word(Tag.RELOP, "<="),
 	ne = new Word(Tag.RELOP, "<>"),
 	ge = new Word(Tag.RELOP, ">="),
-	neq = new Word(Tag.RELOP, "!=");
+	neq = new Word(Tag.RELOP, "!="),
+	vero = new Word(Tag.TRUE, "TRUE"),
+	falso = new Word(Tag.FALSE, "FALSE");
 }

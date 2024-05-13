@@ -29,8 +29,6 @@ public class VirgolaMobile {
                         state = 2;
                     } else if (c == 'e'){
                         state = 4;
-                    } else if (c == '+' || c == '-'){
-                        state = 3;
                     } else {
                         state = -1;
                     }

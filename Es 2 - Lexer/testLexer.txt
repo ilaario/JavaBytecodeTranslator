@@ -1,12 +1,1 @@
-assign 1 to a;
-
-read[b];
-
-while(<= a b){
-    print[a];
-    assign +(a, 1) to a
-};
-
-conditional[
-    option(<= 1 2) do print[1]
-] end;
+012

@@ -57,7 +57,7 @@ public class Parser {
                 break;
 
             default:
-                expr();
+                error("Errore sintattico");
         }
     }
 
@@ -79,7 +79,7 @@ public class Parser {
                 break;
 
             default:
-                expr();
+                error("Errore sintattico");
         }
     }
     private void fact () {
@@ -104,7 +104,7 @@ public class Parser {
 
     public static void main (String[]args){
         Lexer lex = new Lexer();
-        String path = "/Users/ilaario/Desktop/Progetti/ProgettoLFT/Es 3 - Parser/Es3.1/testParser"; // il percorso del file da leggere
+        String path = "C:\\Users\\giopi\\Downloads\\Progetto LFT\\Progetto LFT\\testParser"; // il percorso del file da leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
             Parser parser = new Parser(lex, br);

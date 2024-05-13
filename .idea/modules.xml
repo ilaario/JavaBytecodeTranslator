@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/Es 3 - Parser/Es 3 - Parser.iml" filepath="$PROJECT_DIR$/Es 3 - Parser/Es 3 - Parser.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Linguaggi Formali e Traduttori.iml" filepath="$PROJECT_DIR$/Linguaggi Formali e Traduttori.iml" />
+    </modules>
+  </component>
+</project>

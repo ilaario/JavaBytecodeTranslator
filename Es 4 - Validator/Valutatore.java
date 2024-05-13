@@ -1,7 +1,7 @@
 import java.io.*;
 public class Valutatore {
-    private Lexer lex;
-    private BufferedReader pbr;
+    private final Lexer lex;
+    private final BufferedReader pbr;
     private Token look;
 
     public Valutatore(Lexer l, BufferedReader br) {
@@ -15,7 +15,7 @@ public class Valutatore {
         System.out.println("token = " + look);    }
 
     void error(String s) {
-        throw new Error("Linea n." + lex.line + ": " + s);
+        throw new Error("Linea n." + Lexer.line + ": " + s);
     }
 
     void match(int t) {
@@ -27,23 +27,18 @@ public class Valutatore {
 
     public void start() {
         int expr_val;
-        switch(look.tag){
-            case Tag.NUM, '(':
+        switch (look.tag) {
+            case Tag.NUM, '(' -> {
                 expr_val = expr();
                 System.out.println(expr_val);
-                break;
-
-            case Tag.EOF:
-                match(Tag.EOF);
-                break;
-
-            default:
-                error("Errore in <start>");
+            }
+            case Tag.EOF -> match(Tag.EOF);
+            default -> error("Errore in <start>");
         }
     }
 
     private int expr() {
-        int term_val = 0, expr_val = 0, exprp_val = 0;
+        int term_val, expr_val, exprp_val;
         term_val = term();
         exprp_val = exprp(term_val);
         expr_val = exprp_val;
@@ -57,51 +52,53 @@ public class Valutatore {
     }
 
     private int exprp(int exprp_i) {
-        int term_val, exprp_val = 0;
+        int term_val, exprp_val;
 
         switch (look.tag) {
-            case '+':
+            case '+' -> {
                 match('+');
                 term_val = term();
                 exprp_val = exprp(exprp_i + term_val);
                 return exprp_val;
-
-            case '-':
+            }
+            case '-' -> {
                 match('-');
                 term_val = term();
                 exprp_val = exprp(exprp_i - term_val);
                 return exprp_val;
-
-            default:
+            }
+            default -> {
                 exprp_val = exprp_i;
                 return exprp_val;
+            }
         }
     }
 
     private int termp(int termp_i) {
-        int fact_val, termp_val = 0;
+        int fact_val, termp_val;
 
-        switch (look.tag){
-            case '*':
+        switch (look.tag) {
+            case '*' -> {
                 match('*');
                 fact_val = fact();
                 termp_val = termp(termp_i * fact_val);
                 return termp_val;
-
-            case '/':
+            }
+            case '/' -> {
                 match('/');
                 fact_val = fact();
                 termp_val = termp(termp_i / fact_val);
                 return termp_val;
-
-            default:
+            }
+            default -> {
                 termp_val = termp_i;
                 return termp_val;
+            }
         }
     }
 
     private int fact() {
-        int fact_val, expr_val = 0;
+        int fact_val, expr_val;
         switch(look.tag){
             case '(':
                 match('(');
@@ -128,7 +125,7 @@ public class Valutatore {
     }
     public static void main(String[] args) {
         Lexer lex = new Lexer();
-        String path = "/Users/ilaario/Desktop/Progetti/ProgettoLFT/Es 4 - Validator/testValidator.txt"; // il percorso del file da leggere
+        String path = "C:\\Users\\giopi\\Downloads\\Progetto LFT\\Progetto LFT\\testValidator.txt"; // il percorso del file da leggere
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
             Valutatore valutatore = new Valutatore(lex, br);

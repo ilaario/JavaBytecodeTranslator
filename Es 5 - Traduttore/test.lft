@@ -1,14 +1,12 @@
-assign 1 to a;
+/*input 2023
+****/
+read[a_1,_2b];
+while(<> a_1 _2b)
+    conditional[ option (> a_1 _2b) do assign - a_1 _2b to a_1 ]
+    else assign - _2b a_1 to _2b end;
+print[a_1, *(_2b, a_1, 42), 2023];
+assign 114 to c,d,e;
+print[c,d,e];
+print[+(5,6)]
 
-read[b];
-
-while(<= a b){
-    print[a];
-    assign +(a, 1) to a
-};
-
-conditional[
-    option(<= 1 2) do print[1]
-] end;
-
-print[100];
+//end
